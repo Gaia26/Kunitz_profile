@@ -114,4 +114,4 @@ done
 
 # Step 5: Final performance
 grep -v ">" out_best.txt |grep -v ":" | awk -F ',' '{split($6, mcc, "="); sum += mcc[2]; count++} END {print "Average MCC:", sum/count}'
-grep  "F1" out_best.txt | awk -F ':' '{split($2, F1, "="); sum += F1[2]; count++} END {print "Average F1:", sum/count}'
+grep "F1 score" out_best.txt | awk -F ': ' '{sum += $2; count++} END {print "Average F1:", sum/count}'

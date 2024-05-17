@@ -2,17 +2,6 @@
 import sys
 import numpy as np
 
-# def get_data(predfile): 
-#     """Reading the info has to identify to each seq the e-value and the label"""
-#     preds = [] #output = list of lists
-#     with open(predfile, "r") as f:
-#         for line in f:
-#             v = line.rstrip().split() #v = [seqID, e-value, label]
-#             v[1] = float(v[1]) #e-value
-#             v[2] = int(v[2]) #label -> we use int instead of bool because is useful after for the confision matrix (we use them as indexes to access the matrix)
-#             preds.append(v)
-#     return preds
-
 def get_data(predfile): 
     """Reading the info has to identify to each seq the e-value and the label"""
     preds = [] #output = list of lists
@@ -40,7 +29,6 @@ def compute_cm(preds,th=0.5):
     for pred in preds: #we mantein 0 and 1 because these are also the indexes of the line and the col of the matrix
         p=0  #prediction is 0 by default
         if pred[1]<=th: p=1 #if e-value lower than the threshold the prediction is positive
-        #the sign depends on what is the variable that we use to do the classification, in our case the best case is the e-value as lower as possible, so we use <=
         cm[p][pred[2]]+=1 #we identify the cell [prediction][label=reality] and we add one case
         if p == 0 and pred[2] == 1: # false pos
             fp_ids.append(pred[0]) # append IDs
@@ -73,17 +61,15 @@ def get_f1(cm): # 2 * (precision * recall) / (precision + recall)
     tn = cm[0][0]
     fp = cm[0][1]
     fn = cm[1][0]
-    
-
     if tp + fp == 0 or tp + fn == 0:
         return 0.0  # Avoid division by zero
 
     precision = tp / (tp + fp)
     recall = tp / (tp + fn)
-
+    
     if precision + recall == 0:
         return 0.0  # Avoid division by zero
-
+        
     f1_score = 2 * (precision * recall) / (precision + recall)
     return f1_score
 
@@ -96,7 +82,6 @@ if __name__=="__main__":
     #print(preds)
     if len(sys.argv)<2: 
         cm_complete = compute_cm(preds)
-        
     else:
         th = float(sys.argv[2]) #float because it is an e-value
         cm_complete = compute_cm(preds,th)

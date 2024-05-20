@@ -103,7 +103,7 @@ This folder contains the initial datasets and processed files necessary for buil
 
    ```
 
-1. **Run the 5-fold CV**:
+2. **Run the 5-fold CV**:
    ```sh
    ./cross_val.sh
    ```

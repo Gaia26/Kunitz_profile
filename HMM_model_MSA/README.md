@@ -51,7 +51,9 @@ This folder stores intermediate files generated during the 5-fold CV process. Th
 - `msa_com_set_0123.txt`, `msa_com_set_0124.txt`, `msa_com_set_0134.txt`, `msa_com_set_0234.txt`, `msa_com_set_1234.txt`: input files for the application of the `Performance.py` script for the combined testing sets. 
 
 All files have a similar general structure:
-   *seqID e-value label*
+   ```sh
+     seqID e-value label
+   ```
 
 
 

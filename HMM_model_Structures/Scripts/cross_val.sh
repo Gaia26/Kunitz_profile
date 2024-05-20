@@ -2,92 +2,91 @@
 
 # all the output files are generated in the current directory 
 
+# POSITIVE 
+# Step 1: Randomize and split the IDs
+sort -R selected_ids > r1.selected.ids
+split -d -a 1 -n 5 r1.selected.ids pos_subset_
 
-# # POSITIVE 
-# # Step 1: Randomize and split the IDs
-# sort -R selected_ids > r1.selected.ids
-# split -d -a 1 -n 5 r1.selected.ids pos_subset_
+# Step 2: Create the 5 positive fasta files
+for i in {0..4}; do
+    python3 select_fasta.py  pos_subset_$i  bpti_pos_selected.fasta  > pos_subset_$i.fasta
+done
 
-# # Step 2: Create the 5 positive fasta files
-# for i in {0..4}; do
-#     python3 select_fasta.py  pos_subset_$i  bpti_pos_selected.fasta  > pos_subset_$i.fasta
-# done
+# Step 3: Create 5 subsets that are iteratively excluding one set
+for i in {0..4}; do
+    # Initialize prefix variable
+    pref=""
 
-# # Step 3: Create 5 subsets that are iteratively excluding one set
-# for i in {0..4}; do
-#     # Initialize prefix variable
-#     pref=""
+    # Loop to construct prefix without i
+    for j in {0..4}; do
+        if [ $j -ne $i ]; then
+            pref="${pref}${j}"
+        fi
+    done
 
-#     # Loop to construct prefix without i
-#     for j in {0..4}; do
-#         if [ $j -ne $i ]; then
-#             pref="${pref}${j}"
-#         fi
-#     done
+    # Loop to concatenate subset files
+    for j in {0..4}; do 
+        cat pos_subset_$j.fasta >> pos_subset_${pref}.fasta
+    done
 
-#     # Loop to concatenate subset files
-#     for j in {0..4}; do 
-#         cat pos_subset_$j.fasta >> pos_subset_${pref}.fasta
-#     done
-
-#     hmmsearch -Z 1 --domZ 1 --max --noali --tblout combined_pos_hmm_${pref}.out cut_kunitz_3d.hmm pos_subset_${pref}.fasta 
-#     grep -v "#" combined_pos_hmm_${pref}.out |awk '{print $1"\t"$8"\t1"}' > com_set_${pref}.txt
-
+    hmmsearch -Z 1 --domZ 1 --max --noali --tblout combined_pos_hmm_${pref}.out cut_kunitz_3d.hmm pos_subset_${pref}.fasta 
+    grep -v "#" combined_pos_hmm_${pref}.out |awk '{print $1"\t"$8"\t1"}' > com_set_${pref}.txt
 
 
-#     # Apply hmmsearch to each file
-#     hmmsearch -Z 1 --domZ 1 --max --noali --tblout hmmsearch_pos_$i.out cut_kunitz_3d.hmm pos_subset_$i.fasta
-#     grep -v "#" hmmsearch_pos_$i.out |awk '{print $1"\t"$8"\t1"}' > set_$i.txt
 
-# done
+    # Apply hmmsearch to each file
+    hmmsearch -Z 1 --domZ 1 --max --noali --tblout hmmsearch_pos_$i.out cut_kunitz_3d.hmm pos_subset_$i.fasta
+    grep -v "#" hmmsearch_pos_$i.out |awk '{print $1"\t"$8"\t1"}' > set_$i.txt
+
+done
 
 
-# # NEGATIVE
-# # Step 1: Randomize and split the IDs
-# zcat -f uniprotkb_reviewed_true_NOT_xref_pfam_P_2024_04_15.fasta | grep "^>" | cut -d  "|" -f 2 > negative.ids
-# sort -R negative.ids > negatives_r1.ids
-# split -d -a 1 -n 5 negatives_r1.ids neg_subset_
+# NEGATIVE
+# Step 1: Randomize and split the IDs
+zcat -f uniprotkb_reviewed_true_NOT_xref_pfam_P_2024_04_15.fasta | grep "^>" | cut -d  "|" -f 2 > negative.ids
+sort -R negative.ids > negatives_r1.ids
+split -d -a 1 -n 5 negatives_r1.ids neg_subset_
 
-# # Step 2: Create the 5 negative fasta files
-# for i in {0..4}; do
-#     python3 select_fasta.py  neg_subset_$i  <(zcat -f uniprotkb_reviewed_true_NOT_xref_pfam_P_2024_04_15.fasta) 2   > neg_subset_$i.fasta
-# done
+# Step 2: Create the 5 negative fasta files
+for i in {0..4}; do
+    python3 select_fasta.py  neg_subset_$i  <(zcat -f uniprotkb_reviewed_true_NOT_xref_pfam_P_2024_04_15.fasta) 2   > neg_subset_$i.fasta
+done
 
-# # Step 3: Create 5 subsets that are iteratively excluding one set
-# for i in {0..4}; do
-#     # Initialize prefix variable
-#     pref=""
+# Step 3: Create 5 subsets that are iteratively excluding one set
+for i in {0..4}; do
+    # Initialize prefix variable
+    pref=""
 
-#     # Loop to construct prefix without i
-#     for j in {0..4}; do
-#         if [ $j -ne $i ]; then
-#             pref="${pref}${j}"
-#         fi
-#     done
+    # Loop to construct prefix without i
+    for j in {0..4}; do
+        if [ $j -ne $i ]; then
+            pref="${pref}${j}"
+        fi
+    done
 
-#     # Loop to concatenate subset files
-#     for j in {0..4}; do 
-#         cat neg_subset_$j >> neg_subset_${pref}.ids 
-#         cat neg_subset_$j.fasta >> neg_subset_${pref}.fasta
+    # Loop to concatenate subset files
+    for j in {0..4}; do 
+        cat neg_subset_$j >> neg_subset_${pref}.ids 
+        cat neg_subset_$j.fasta >> neg_subset_${pref}.fasta
         
-#     done
+    done
 
-#     # Apply hmmsearch to each combined file
-#     hmmsearch -Z 1 --domZ 1 --max --noali --tblout combined_neg_hmm_${pref}.out cut_kunitz_3d.hmm neg_subset_${pref}.fasta 
+    # Apply hmmsearch to each combined file
+    hmmsearch -Z 1 --domZ 1 --max --noali --tblout combined_neg_hmm_${pref}.out cut_kunitz_3d.hmm neg_subset_${pref}.fasta 
 
-#     grep -v "#" combined_neg_hmm_${pref}.out |awk '{print $1"\t"$8"\t0"}' > tmp_neg_${pref}.txt
-#     comm -23 <(sort neg_subset_${pref}.ids ) <(cut -f 1 tmp_neg_${pref}.txt | sort)| awk '{print $1"\t10\t0"}' >> tmp_neg_${pref}.txt
-#     cat tmp_neg_${pref}.txt >> com_set_${pref}.txt
-
-
-#     # Apply hmmsearch to each file
-#     hmmsearch -Z 1 --domZ 1 --max --noali --tblout hmmsearch_neg_$i.out cut_kunitz_3d.hmm neg_subset_$i.fasta
-#     grep -v "#" hmmsearch_neg_$i.out |awk '{print $1"\t"$8"\t0"}' > tmp_neg_$i.txt
-#     comm -23 <(sort neg_subset_$i) <(cut -f 1 tmp_neg_$i.txt | sort)| awk '{print $1"\t10\t0"}' >> tmp_neg_$i.txt
-#     cat tmp_neg_$i.txt >> set_$i.txt
+    grep -v "#" combined_neg_hmm_${pref}.out |awk '{print $1"\t"$8"\t0"}' > tmp_neg_${pref}.txt
+    comm -23 <(sort neg_subset_${pref}.ids ) <(cut -f 1 tmp_neg_${pref}.txt | sort)| awk '{print $1"\t10\t0"}' >> tmp_neg_${pref}.txt
+    cat tmp_neg_${pref}.txt >> com_set_${pref}.txt
 
 
-# done
+    # Apply hmmsearch to each file
+    hmmsearch -Z 1 --domZ 1 --max --noali --tblout hmmsearch_neg_$i.out cut_kunitz_3d.hmm neg_subset_$i.fasta
+    grep -v "#" hmmsearch_neg_$i.out |awk '{print $1"\t"$8"\t0"}' > tmp_neg_$i.txt
+    comm -23 <(sort neg_subset_$i) <(cut -f 1 tmp_neg_$i.txt | sort)| awk '{print $1"\t10\t0"}' >> tmp_neg_$i.txt
+    cat tmp_neg_$i.txt >> set_$i.txt
+
+
+done
 
 
 # Step 4: Analysis of the performance

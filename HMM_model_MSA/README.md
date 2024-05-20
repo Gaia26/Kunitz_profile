@@ -1,6 +1,6 @@
 # README
 
-## HMM_model_Structures
+## HMM_model_MSA
 
 This repository contains all files and scripts necessary for constructing a profile Hidden Markov Model (HMM) based on 3D structural alignments for the Kunitz-type protease inhibitor domain. The repository is organized into several folders, each serving a specific purpose in the model building and validation process.
 
